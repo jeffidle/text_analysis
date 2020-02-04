@@ -1,5 +1,5 @@
 # Define server logic to read selected file ----
-server <- function(input, output, session) {
+server <- function(input, output) {
         
         text_data <- reactive({
                 
@@ -12,24 +12,27 @@ server <- function(input, output, session) {
                 if(input$filetype1 == "CSV"){
                         
                         data_df <- read.csv(input$file1$datapath,
-                                               header = input$header1,
-                                               stringsAsFactors = FALSE,
-                                               sep = ",",
-                                               quote = input$quote1)
+                                               header = TRUE,
+                                               stringsAsFactors = FALSE)
                         
                 } else {
                         
                         data_df <- read_xlsx(input$file1$datapath,
-                                                col_names = input$header1,
-                                                trim_ws = TRUE)
+                                             col_names = TRUE,
+                                             trim_ws = TRUE)
                         
                 }
                 
                 if(input$disp1 == "head") {
-                        return(head(data_df))
+                        
+                        return(head(data_df, 10))
+                        
                 }
+                
                 else {
+                        
                         return(data_df)
+                        
                 }
         })
         
@@ -51,25 +54,27 @@ server <- function(input, output, session) {
                 if(input$filetype2 == "CSV"){
                         
                         library_df <- read.csv(input$file2$datapath,
-                                               header = input$header2,
-                                               stringsAsFactors = FALSE,
-                                               sep = ",",
-                                               quote = input$quote2)
+                                               header = TRUE,
+                                               stringsAsFactors = FALSE)
                                 
                 } else {
                         
                         library_df <- read_xlsx(input$file2$datapath,
-                                               col_names = input$header2,
+                                               col_names = TRUE,
                                                trim_ws = TRUE)
                         
                 }
                 
                 
                 if(input$disp2 == "head") {
-                        return(head(library_df))
+                        
+                        return(head(library_df, 10))
                 }
+                
                 else {
+                        
                         return(library_df)
+                        
                 }
                 
         })
@@ -82,11 +87,34 @@ server <- function(input, output, session) {
                 
         })
         
-        observe({
-                updateSelectInput(session, "library_name",
-                                  label = "library_name",
-                                  choices = library_data()$names,
-                                  selected = library_data()$names[1])
+        output$library_name_select <- renderUI({
+                
+                library_names_list <- names(library_data())
+                
+                selectInput("library_name", "Select the column that contains the names of your libraries:",
+                            choices = library_names_list,
+                            selected = NULL)
+                
+        })
+        
+        output$library_words_select <- renderUI({
+                
+                library_names_list <- names(library_data())
+                
+                selectInput("library_words", "Select the column that contains your library terms:",
+                            choices = library_names_list,
+                            selected = NULL)
+                
+        })
+        
+        output$data_text_select <- renderUI({
+                
+                data_names_list <- names(text_data())
+                
+                selectInput("data_text", "Select the text you want to analyze:",
+                            choices = data_names_list,
+                            selected = NULL)
+                
         })
         
 }

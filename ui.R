@@ -12,7 +12,7 @@ ui <- fluidPage(
                                     
                                     # Input: Select a file ----
                                     fileInput("file1", "Choose CSV or XLSX data file",
-                                              multiple = TRUE,
+                                              multiple = FALSE,
                                               accept = c("text/csv",
                                                          "text/comma-separated-values,text/plain",
                                                          ".csv",
@@ -21,24 +21,11 @@ ui <- fluidPage(
                                     # Horizontal line ----
                                     tags$hr(),
                                     
-                                    # Input: Checkbox if file has header ----
-                                    checkboxInput("header1", "Header", TRUE),
-                                    
                                     # Input: Select separator ----
                                     radioButtons("filetype1", "File Type",
                                                  choices = c("CSV" = "CSV",
                                                              "XLSX" = "XLSX"),
-                                                 selected = "CSV"),
-                                    
-                                    # Input: Select quotes ----
-                                    radioButtons("quote1", "Quote",
-                                                 choices = c(None = "",
-                                                             "Double Quote" = '"',
-                                                             "Single Quote" = "'"),
-                                                 selected = '"'),
-                                    
-                                    # Horizontal line ----
-                                    tags$hr(),
+                                                 selected = NULL),
                                     
                                     # Input: Select number of rows to display ----
                                     radioButtons("disp1", "Display",
@@ -65,7 +52,7 @@ ui <- fluidPage(
                                     
                                     # Input: Select a file ----
                                     fileInput("file2", "Choose CSV or XLSX library file",
-                                              multiple = TRUE,
+                                              multiple = FALSE,
                                               accept = c("text/csv",
                                                          "text/comma-separated-values,text/plain",
                                                          ".csv",
@@ -74,24 +61,11 @@ ui <- fluidPage(
                                     # Horizontal line ----
                                     tags$hr(),
                                     
-                                    # Input: Checkbox if file has header ----
-                                    checkboxInput("header2", "Header", TRUE),
-                                    
                                     # Input: Select separator ----
                                     radioButtons("filetype2", "File Type",
                                                  choices = c("CSV" = "CSV",
                                                              "XLSX" = "XLSX"),
-                                                 selected = "CSV"),
-                                    
-                                    # Input: Select quotes ----
-                                    radioButtons("quote2", "Quote",
-                                                 choices = c(None = "",
-                                                             "Double Quote" = '"',
-                                                             "Single Quote" = "'"),
-                                                 selected = '"'),
-                                    
-                                    # Horizontal line ----
-                                    tags$hr(),
+                                                 selected = NULL),
                                     
                                     # Input: Select number of rows to display ----
                                     radioButtons("disp2", "Display",
@@ -111,18 +85,20 @@ ui <- fluidPage(
                             
                     )),
                     
-                    tabPanel("(3) Choose how you want to map and clean your data >>",
+                    tabPanel("(3) Process your data >>",
                              
-                             column(6, selectInput("library_name", "Select the column that contains the names of your libraries:", choices = "")),
-                             column(6, selectInput("library_terms", "Select the column that contains your library terms:", choices = ifelse(exists("library_df"), sort(names(library_df)), "Please upload your library"))),
-                             column(6, selectInput("unique_id", "Select the unique record identifier in your data:", choices = ifelse(exists("data_df"), sort(names(data_df)), "Please upload your data"))),
-                             column(6, selectInput("text_data", "Select the text you want to analyze:", choices = ifelse(exists("data_df"), sort(names(data_df)), "Please upload your data"))),
-                             column(12, checkboxGroupInput("data_cleaning", "Choose the data cleansing functions you want to apply to your data:", 
-                                                    c("Convert to lowercase", "Replace abbreviations", "Replace numbers", "Replace symbols", "Remove contractions")))),
+                             column(4, uiOutput("library_name_select")),
+                             column(4, uiOutput("library_words_select")),
+                             column(4, uiOutput("data_text_select")),
+                             column(6, checkboxGroupInput("data_cleaning", "Choose the data cleansing functions you want to apply to your data:", 
+                                                    c("Convert to lowercase", "Replace abbreviations", "Replace numbers", "Replace symbols", "Remove contractions"))),
+                             column(6, actionButton("process_data", "Process my data"))),
                     
                     tabPanel("(4) View output >>", "For each comment:  character count, word count, polarity score, negative words, positive words, library word flag, library word count, library words found, risk scale (0-1)"),
                     
-                    tabPanel("(5) Output summary", "Output summary by dictionary")
+                    tabPanel("(5) Output summary", "Output summary by dictionary"),
+                    
+                    tabPanel("(6) Correlation analysis", "Show correlation matrix for all metrics (character count, word count, polarity score, negative word count, positive word count, library word count and risk scale converted to 0-1 scale) and allow user to select 2 metrics and view scatterplot with regression line.")
                     
         )
         
