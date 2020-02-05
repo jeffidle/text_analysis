@@ -23,6 +23,8 @@ server <- function(input, output) {
                         
                 }
                 
+                text_df <<- data_df
+                
                 if(input$disp1 == "head") {
                         
                         return(head(data_df, 10))
@@ -65,6 +67,7 @@ server <- function(input, output) {
                         
                 }
                 
+                library_df <<- library_df
                 
                 if(input$disp2 == "head") {
                         
@@ -114,6 +117,12 @@ server <- function(input, output) {
                 selectInput("data_text", "Select the text you want to analyze:",
                             choices = data_names_list,
                             selected = NULL)
+                
+        })
+        
+        output$processed_data <- renderTable({
+                
+                processed_df <- text_cleaning_fx(text_df, library_df, input$library_name_select, input$library_words_select, input$data_text_select, input$data_cleaning)
                 
         })
         

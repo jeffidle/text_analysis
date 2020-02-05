@@ -87,12 +87,33 @@ ui <- fluidPage(
                     
                     tabPanel("(3) Process your data >>",
                              
-                             column(4, uiOutput("library_name_select")),
-                             column(4, uiOutput("library_words_select")),
-                             column(4, uiOutput("data_text_select")),
-                             column(6, checkboxGroupInput("data_cleaning", "Choose the data cleansing functions you want to apply to your data:", 
-                                                    c("Convert to lowercase", "Replace abbreviations", "Replace numbers", "Replace symbols", "Remove contractions"))),
-                             column(6, actionButton("process_data", "Process my data"))),
+                             sidebarPanel(
+                                     
+                                     uiOutput("library_name_select"),
+                                     
+                                     uiOutput("library_words_select"),
+                                     
+                                     uiOutput("data_text_select"),
+                                     
+                                     checkboxGroupInput("data_cleaning", "Choose the data cleansing functions you want to apply to your data:", 
+                                                        c("Remove special characters" = "clean_special_chars",
+                                                          "Convert to lowercase" = "clean_lower",
+                                                          "Replace abbreviations" = "clean_abbrev",
+                                                          "Replace numbers" = "clean_numbers",
+                                                          "Replace symbols" = "clean_symbols",
+                                                          "Remove contractions" = "clean_contractions")),
+                                     
+                                     actionButton("process_data", "Process my data")
+                                     
+                             ),
+                             
+                             mainPanel(
+                                     
+                                     tableOutput("processed_data")
+                                     
+                                     )
+                             
+                             ),
                     
                     tabPanel("(4) View output >>", "For each comment:  character count, word count, polarity score, negative words, positive words, library word flag, library word count, library words found, risk scale (0-1)"),
                     

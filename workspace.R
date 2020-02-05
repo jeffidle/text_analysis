@@ -1,6 +1,11 @@
+library(magrittr)
 library(ngram)
 library(qdap)
 library(tidyverse)
+
+source("functions.R")
+
+script_start <- Sys.time()
 
 text_data_df <- read.csv("text_complaints_small.csv", header = TRUE, stringsAsFactors = FALSE, na.strings = c("", " ", "  ", "   ", "    ", "-", "N/A", "#N/A", "n/a", "#n/a"))
 library_data_df <- read.csv("text_analysis_library.csv", header = TRUE, stringsAsFactors = FALSE)
@@ -9,61 +14,40 @@ library_name_col <- "library"
 library_words_col <- "keyword_phrase"
 text_col <- "Consumer.complaint.narrative"
 
-clean_special_chars <- 0
-clean_lower <- 0
-clean_abbrev <- 0
-clean_numbers <- 0
-clean_symbols <- 1
-clean_contractions <- 0
+#data_clean_tasks <- c("clean_special_chars", "clean_lower", "clean_abbrev", "clean_numbers", "clean_symbols", "clean_contractions")
 
-# Text cleaners
+data_clean_tasks <- c("clean_lower")
 
-df <- text_data_df %>%
-        mutate(record_id = row_number(),
-               text_flag = ifelse(is.na(!!!syms(text_col)), FALSE, TRUE),
-               char_count = nchar(!!!syms(text_col)),
-               word_count = sapply(strsplit(!!!syms(text_col), " "), length) - 1,
-               cleaned_text = text_data_df[[text_col]]) %>%
-        select(record_id, !!!syms(text_col), cleaned_text, text_flag, char_count, word_count)
+processed_df <- text_cleaning_fx(text_data_df, library_data_df, library_name_col, library_words_col, text_col, data_clean_tasks)
 
-if(clean_special_chars == 1){
-        
-        df <- df %>%
-                mutate(cleaned_text = gsub("[^a-zA-Z]", " ", cleaned_text))
-        
-}
+text_df <- processed_df
+#text_df <- sample_n(processed_df, 1000)
 
-if(clean_lower == 1){
-        
-        df <- df %>%
-                mutate(cleaned_text = tolower(cleaned_text))
-        
-}
+processed_w_polarity_df <- polarity_adder_fx(text_df)
 
-if(clean_abbrev == 1){
-        
-        df <- df %>%
-                mutate(cleaned_text = replace_abbreviation(cleaned_text))
-        
-}
+library_reviewed_df <- text_search_bulk_fx(text_df, library_data_df)
 
-if(clean_numbers == 1){
-        
-        df <- df %>%
-                mutate(cleaned_text = replace_number(cleaned_text))
-        
-}
+processed_w_polarity_df <- merge(x = processed_w_polarity_df, y = library_reviewed_df, by = "record_id", all.x = TRUE, all.y = FALSE)
 
-if(clean_symbols == 1){
-        
-        df <- df %>%
-                mutate(cleaned_text = replace_symbol(cleaned_text))
-        
-}
+###################################################################
+# Output summary
+###################################################################
 
-if(clean_contractions == 1){
+total_records <- nrow(processed_w_polarity_df)
+
+summary_df <- data.frame(
         
-        df <- df %>%
-                mutate(cleaned_text = replace_contraction(cleaned_text))
-        
-}
+        metric = "total_records",
+        category = "all",
+        count = total_records,
+        pct_of_total = 1
+)
+
+flag_metrics <- names(processed_w_polarity_df %>% select(contains("flag")))
+
+flag_summary_df <- flag_summary_fx(processed_w_polarity_df, flag_metrics)
+
+summary_df <- bind_rows(summary_df, flag_summary_df)
+
+script_end <- Sys.time()
+elapsed_time <- script_end - script_start
