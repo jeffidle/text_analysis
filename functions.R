@@ -7,8 +7,9 @@ text_cleaning_fx <- function(text_df, library_df, library_name_col, library_word
                        text_flag = ifelse(is.na(!!!syms(text_col)), FALSE, TRUE),
                        char_count = nchar(!!!syms(text_col)),
                        word_count = sapply(strsplit(!!!syms(text_col), " "), length) - 1,
-                       cleaned_text = text_data_df[[text_col]]) %>%
-                select(record_id, !!!syms(text_col), cleaned_text, text_flag, char_count, word_count)
+                       cleaned_text = text_data_df[[text_col]],
+                       cleaned_text_word_count = sapply(strsplit(cleaned_text, " "), length) - 1) %>%
+                select(record_id, !!!syms(text_col), cleaned_text, text_flag, char_count, word_count, cleaned_text_word_count)
         
         df$word_count[df$word_count == 0] <- NA
         
@@ -109,6 +110,13 @@ polarity_adder_fx <- function(df){
         
 }
 
+
+# Word count function
+word_count_fx <- function(x){
+        
+        length(unlist(strsplit(str_trim(x), '[[:blank:]]+')))       
+        
+}
 
 # This function creates the list of words or phrases that need to be displayed
 # in the words found fields
